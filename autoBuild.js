@@ -22,11 +22,11 @@ handler.on('push', (event) => {
 
   let project = _.find(config.hooks, { repository: 'docs' })
 
-  if (project.lockBranch && project.lockBranch != 'master') {
+  if (project.lockBranch && project.lockBranch != branchName) {
     return console.info('Rejected %s a push event for %s to %s, INFO: branch not match', pusherName, repositoryName, branchName)
   }
 
-  if (project.lockUser && project.lockUser != 'cx') {
+  if (project.lockUser && project.lockUser != pusherName) {
     return console.info('Rejected %s a push event for %s to %s, INFO: pusher not match', pusherName, repositoryName, branchName)
   }
 
