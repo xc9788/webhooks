@@ -15,6 +15,22 @@ http.createServer((req, res) => {
   })
 }).listen(6666)
 
+let runCommand = (shell) => {
+  // filter danger string rm 
+  if (shell.indexOf('rm') >= 0) {
+    return console.info('shell is danger')
+  }
+
+  // exec shell
+  exec(shell, (error, stdout, stderr) => {
+    if (error) {
+      return console.info(`exec error: ${error}`)
+    }
+    console.info(`stdout: ${stdout}`)
+    console.info(`stderr: ${stderr}`)
+  })
+}
+
 handler.on('push', (event) => {
   let pusherName = event.payload.pusher.name
   let repositoryName = event.payload.repository.name
@@ -37,18 +53,3 @@ handler.on('push', (event) => {
 
 handler.on('error', (err) => { console.error('Error:', err.message) })
 
-let runCommand = (shell) => {
-  // filter danger string rm 
-  if (shell.indexOf('rm') >= 0) {
-    return console.log('shell is danger')
-  }
-
-  // exec shell
-  exec(shell, (error, stdout, stderr) => {
-    if (error) {
-      return console.log(`exec error: ${error}`)
-    }
-    console.log(`stdout: ${stdout}`)
-    console.log(`stderr: ${stderr}`)
-  });
-}
