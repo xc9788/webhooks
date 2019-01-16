@@ -12,7 +12,7 @@ module.exports = {
     {
       repository: "private_docs",
       shell: "docsRatRedUpdate",
-      lockBranch: "master",
+      lockBranch: "master"
     }
   ]
 }

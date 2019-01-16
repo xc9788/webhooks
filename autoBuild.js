@@ -2,7 +2,6 @@
 
 const _             = require('lodash')
 const http          = require('http')
-//const spawn         = require('child_process').spawn
 const exec          = require('child_process').exec
 const createHandler = require('github-webhook-handler')
 const config        = require('./config.js')
@@ -38,14 +37,14 @@ handler.on('push', (event) => {
 
 handler.on('error', (err) => { console.error('Error:', err.message) })
 
-function runCommand(shell) {
+let runCommand = (shell) => {
   // filter danger string rm 
   if (shell.indexOf('rm') >= 0) {
     return console.log('shell is danger')
   }
 
+  // exec shell
   exec(shell, (error, stdout, stderr) => {
-    // 
     if (error) {
       return console.log(`exec error: ${error}`)
     }
