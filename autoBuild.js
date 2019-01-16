@@ -20,7 +20,7 @@ handler.on('push', (event) => {
   let repositoryName = event.payload.repository.name
   let branchName = _.split(event.payload.ref, '/').pop()
 
-  let project = _.find(config.hooks, { repository: 'docs' })
+  let project = _.find(config.hooks, { repository: repositoryName })
 
   if (project.lockBranch && project.lockBranch != branchName) {
     return console.info('Rejected %s a push event for %s to %s, INFO: branch not match', pusherName, repositoryName, branchName)
