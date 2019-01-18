@@ -1,55 +1,17 @@
 'use strict'
 
-const _             = require('lodash')
-const http          = require('http')
-const exec          = require('child_process').exec
-const createHandler = require('github-webhook-handler')
-const config        = require('./config.js')
+const httpServer     = require('./lib/httpServer')
+const webhookHandler = require('./lib/webhookHandler')
 
-const handler = createHandler({ path: config.path, secret: config.secret })
+const config         = require('./config.js')
 
-http.createServer((req, res) => {
-  handler(req, res, (err) => {
-    res.statusCode = 404
-    res.end('no such location')
-  })
-}).listen(6666)
+// 创建handler 可创建多个, 新handler并需再创建一个对应的http服务
+let handler = webhookHandler.create(config)
 
-let runCommand = (shell) => {
-  // filter danger string rm 
-  if (shell.indexOf('rm') >= 0) {
-    return console.info('shell is danger')
-  }
+// 将hooker监听到http的6666端口
+httpServer.create((req, res) => { webhookHandler.server(handler, req, res) }, 6666)
 
-  // exec shell
-  exec(shell, (error, stdout, stderr) => {
-    if (error) {
-      return console.info(`exec error: ${error}`)
-    }
-    console.info(`stdout: ${stdout}`)
-    console.info(`stderr: ${stderr}`)
-  })
-}
-
-handler.on('push', (event) => {
-  let pusherName = event.payload.pusher.name
-  let repositoryName = event.payload.repository.name
-  let branchName = _.split(event.payload.ref, '/').pop()
-
-  let project = _.find(config.hooks, { repository: repositoryName })
-
-  if (project.lockBranch && project.lockBranch != branchName) {
-    return console.info('Rejected %s a push event for %s to %s, INFO: branch not match', pusherName, repositoryName, branchName)
-  }
-
-  if (project.lockUser && project.lockUser != pusherName) {
-    return console.info('Rejected %s a push event for %s to %s, INFO: pusher not match', pusherName, repositoryName, branchName)
-  }
-
-  console.info('Received %s a push event for %s to %s', pusherName, repositoryName, branchName)
-
-  runCommand(project.shell)
-})
-
-handler.on('error', (err) => { console.error('Error:', err.message) })
+// handler 加载支持处理的事件
+webhookHandler.loadPushEvent(handler)
+webhookHandler.loadErrorEvent(handler)
 
